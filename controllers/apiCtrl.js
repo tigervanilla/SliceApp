@@ -1,5 +1,8 @@
 module.exports={
     showHome:(req,res,next)=>{
-        res.json({'msg':'Welcome to SliceApp'})
+        req.db.collection('users').findOne({name:'Jarvis'},(err,doc)=>{
+            if(err) throw err
+            res.json(doc)
+        })
     }
 }
