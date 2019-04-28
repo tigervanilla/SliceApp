@@ -4,21 +4,23 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var authUtils=require('./utils/authUtils')
+var authUtils = require('./utils/authUtils')
 
-var MongoClient=require('mongodb').MongoClient
-var dbConfig=require('./config/dbConfig')
-var myMongoClient=null
+var MongoClient = require('mongodb').MongoClient
+var dbConfig = require('./config/dbConfig')
+var myMongoClient = null
 
-MongoClient.connect(dbConfig.url,{useNewUrlParser:true},(err,dbClient)=>{
-  if(err) throw err
-  myMongoClient=dbClient
+MongoClient.connect(dbConfig.url, {
+  useNewUrlParser: true
+}, (err, dbClient) => {
+  if (err) throw err
+  myMongoClient = dbClient
 })
 
 
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
-var apiRouter=require('./routes/apiRoutes')
+var apiRouter = require('./routes/apiRoutes')
 
 var app = express();
 
@@ -28,12 +30,14 @@ app.set('view engine', 'ejs');
 
 app.use(logger('tiny'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({
+  extended: false
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req,res,next)=>{
-  req.db=myMongoClient.db(dbConfig.dbName)
+app.use((req, res, next) => {
+  req.db = myMongoClient.db(dbConfig.dbName)
   next()
 })
 
@@ -43,12 +47,12 @@ app.use('/', apiRouter);
 // app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -58,7 +62,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-process.on('exit',(code)=>{
+process.on('exit', (code) => {
   myMongoClient.close()
   console.log(`About to exit with code ${code}`)
 })
