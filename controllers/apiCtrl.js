@@ -10,11 +10,31 @@ module.exports={
     tickerSearch:(req,res,next)=>{
         var ticker=req.params.ticker
         var filter={symbol:ticker}
-        var columns={_id:0,open:1,close:1,low:1,high:1}
+        var columns={_id:0,date:1,open:1,close:1,low:1,high:1}
         req.db.collection('prices').find(filter,{projection:columns}).toArray((err,pricePointsList)=>{
             if(err) throw err
             console.log(`FOUND ${pricePointsList.length} DOCUMENTS`)
             res.send(pricePointsList)
+        })
+    },
+
+    // This service should take a company name and returns all the price points of that company over the entire duration.
+    companySearch:(req,res,next)=>{
+        var companyName=req.params.companyName
+        console.log(companyName)
+        req.db.collection('stocks').aggregate([
+            {$match:{Name:companyName}},
+            {$lookup:{
+                from: "prices",
+                localField: "Symbol",
+                foreignField: "symbol",
+                as: "price_points"
+            }},
+            {$project:{Symbol:1,Name:1,price_points:{date:1,open:1,close:1,low:1,high:1}}}
+        ]).toArray((err,docs)=>{
+            if(err) throw err
+            // console.log(docs)
+            res.send(docs[0])
         })
     }
 }
