@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var authUtils=require('./utils/authUtils')
+
 var MongoClient=require('mongodb').MongoClient
 var dbConfig=require('./config/dbConfig')
 var myMongoClient=null
@@ -34,6 +36,8 @@ app.use((req,res,next)=>{
   req.db=myMongoClient.db(dbConfig.dbName)
   next()
 })
+
+app.use(authUtils.clientApiKeyValidation)
 
 app.use('/', apiRouter);
 // app.use('/users', usersRouter);
