@@ -36,5 +36,18 @@ module.exports={
             // console.log(docs)
             res.send(docs[0])
         })
+    },
+
+    stocksInTime:(req,res,next)=>{
+        console.log(req.body)
+        var startDate=req.body.startDate
+        var endDate=req.body.endDate
+        var tickerList=req.body.tickerList
+        var filter={'date':{$gte:startDate},'date':{$lte:endDate},'symbol':{$in:tickerList}}
+        req.db.collection('prices').find(filter,{projection:{_id:0,volume:0}}).sort({'symbol':1}).toArray((err,docs)=>{
+            if(err) throw err
+            console.log(`FOUND ${docs.length} DOCUMENTS`)
+            res.send(docs)
+        })
     }
 }
