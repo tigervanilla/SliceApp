@@ -38,6 +38,7 @@ module.exports={
         })
     },
 
+    // This service should accept two parameters, “any number of stock tickers in a list” and “two dates”. This will return all the highs, lows and closes of these stocks in the desired time frame.
     stocksInTime:(req,res,next)=>{
         console.log(req.body)
         var startDate=req.body.startDate
@@ -48,6 +49,22 @@ module.exports={
             if(err) throw err
             console.log(`FOUND ${docs.length} DOCUMENTS`)
             res.send(docs)
+        })
+    },
+
+    // This service should take two dates as input and should return 10 best performing and 10 least performing stocks in that time frame.
+    timeFrame:(req,res,next)=>{
+        var startDate=req.params.startDate
+        var endDate=req.params.endDate
+        req.db.collection('prices').aggregate([
+            {$match:{date:{$gte:startDate},date:{$lte:endDate}}},
+            {$group:{_id:"$symbol",fluctuation:{$avg:{$subtract:["$open","$close"]}}}},
+            {$sort:{fluctuation:-1}}
+        ]).toArray((err,docs)=>{
+            if(err) throw err
+            var bestPerforming=docs.slice(0,10)
+            var worstPerforming=docs.slice(docs.length-10)
+            res.json({'bestPerforming':bestPerforming,'worstPerforming':worstPerforming})
         })
     }
 }
